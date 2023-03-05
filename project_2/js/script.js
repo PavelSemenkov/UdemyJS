@@ -90,12 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
         buttonsCallUs = document.querySelectorAll('[data-modal]'),
         buttonCloseModalCallUs = document.querySelector('[data-close]');
 
+    // modalTimerId = setTimeout(modalOpen, 5000);
+
     function modalOpen() {
+        modalCallUs.style.display !== 'block' ? modalCallUs.style.display = 'block' : modalCallUs.style.display = 'none';
+        document.body.style.overflow = 'hidden';
+        clearTimeout(modalTimerId);
+    }
+
+    function modalTriggerButton() {
         buttonsCallUs.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                modalCallUs.style.display !== 'block' ? modalCallUs.style.display = 'block' : modalCallUs.style.display = 'none';
-                document.body.style.overflow = 'hidden';
-            })
+            btn.addEventListener('click', modalOpen);
         })
     }
 
@@ -118,6 +123,90 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    modalOpen();
+    modalTriggerButton();
     modalClose();
+
+    function showModalByScroll() {
+        if (window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            modalOpen();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+
+    window.addEventListener('scroll', showModalByScroll);
+
+    // Classes
+    class MenuCard {
+        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
+            this.src = src;
+            this.alt = alt;
+            this.title = title;
+            this.descr = descr;
+            this.price = price;
+            this.classes = classes;
+            this.transfer = 27;
+            this.convertToUAH();
+            this.parent = document.querySelector(parentSelector);
+        }
+
+        convertToUAH() {
+            this.price = this.price * this.transfer;
+        }
+
+        render() {
+            const element = document.createElement('div');
+            if (this.classes.length === 0) {
+                this.classes[0] = 'menu__item';
+                element.classList.add(this.classes[0]);
+            } else {
+                this.classes.forEach(className => element.classList.add(className));
+            }
+            element.innerHTML = (`
+                    <img src=${this.src} alt=${this.alt}>
+                    <h3 class="menu__item-subtitle">${this.title}</h3>
+                    <div class="menu__item-descr">${this.descr}</div>
+                    <div class="menu__item-divider"></div>
+                    <div class="menu__item-price">
+                        <div class="menu__item-cost">Цена:</div>
+                        <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                    </div>
+            `);
+            this.parent.append(element);
+        }
+    }
+
+    new MenuCard(
+        "img/tabs/vegy.jpg",
+        "vegy",
+        'Меню "Фитнес"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих\n' +
+        '                    овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой\n' +
+        '                    и высоким качеством!',
+        9,
+        '.menu .container',
+    ).render();
+
+    new MenuCard(
+        "img/tabs/elite.jpg",
+        "elite",
+        'Меню "Постное"',
+        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и\n' +
+        '                    качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в\n' +
+        '                    ресторан! Это абсолютно новый продукт',
+        14,
+        '.menu .container',
+        'menu__item'
+    ).render();
+
+    new MenuCard(
+        "img/tabs/post.jpg",
+        "post",
+        'Меню "Фитнес"',
+        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие\n' +
+        '                    продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество\n' +
+        '                    белков за счет тофу и импортных вегетарианских стейков.',
+        16,
+        '.menu .container',
+        'menu__item'
+    ).render();
 });
